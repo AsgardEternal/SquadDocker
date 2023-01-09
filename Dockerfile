@@ -50,6 +50,7 @@ fi
 
 declare -A squad_mods="${squad_mods}"
 for mod in "${squad_mods[@]}"; do
+    printf "Adding mod: %s" "${mod}"
     "${STEAM_CMD_INSTALL_DIR}/steamcmd.sh" \
         +force_install_dir "${SQUAD_SERVER_DIR}" \
         +login anonymous \
