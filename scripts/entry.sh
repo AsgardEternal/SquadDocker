@@ -12,7 +12,11 @@ while read -r line; do
 	fi
 done < "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/Rcon.cfg" > "rcon.temp" && mv "rcon.temp" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/Rcon.cfg"
 
-"${SQUAD_SERVER_DIR}/SquadGameServer.sh" \
+chown -R "${USER}:${USER}" /ServerConfig
+chmod -R 0744 /ServerConfig
+
+
+su - "${USER}" -- "${SQUAD_SERVER_DIR}/SquadGameServer.sh" \
 	Port="${GAMEPORT}" \
 	QueryPort="${QUERYPORT}" \
 	FIXEDMAXTICKRATE="${FIXEDMAXTICKRATE}" \

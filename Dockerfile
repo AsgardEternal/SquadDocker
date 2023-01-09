@@ -1,7 +1,6 @@
 # syntax=docker/dockerfile:1.4
 FROM asgard.orion-technologies.io/steamcmd:1.0 AS build
 LABEL maintainer="price@orion-technologies.io"
-USER root
 
 ARG steam_app_id=403240
 ARG steam_beta_app_id=774961
@@ -70,17 +69,15 @@ chmod -R 0744 /ServerConfig
 
 __EOR__
 
-USER "${USER}"
-
 
 
 FROM build AS prod
-USER "${USER}"
 WORKDIR "${USER_HOME}"
-CMD [ "/bin/bash", "entry.sh" ]
 
 EXPOSE ${GAMEPORT}/udp \
             ${QUERYPORT}/tcp \
             ${QUERYPORT}/udp \
             ${RCONPORT}/tcp \
             ${RCONPORT}/udp
+
+ENTRYPOINT [ "/bin/bash", "entry.sh" ]
