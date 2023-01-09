@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.4
 FROM asgard.orion-technologies.io/steamcmd:1.0 AS build
-
 LABEL maintainer="price@orion-technologies.io"
+USER root
 
 ARG steam_app_id=403240
 ARG steam_beta_app_id=774961
@@ -21,9 +21,13 @@ ENV GAMEPORT=7787 \
     FIXEDMAXTICKRATE=40 \
     RANDOM=NONE
 
+COPY --chown=${USER} ./scripts/entry.sh "${USER_HOME}/entry.sh"
+
 SHELL [ "/bin/bash", "-c" ]
 
 RUN <<__EOR__
+
+chmod 0744 "${USER_HOME}/entry.sh"
 
 if (( use_squad_beta == 1 )); then
     # Install Squad from the Beta branch
@@ -57,15 +61,26 @@ for mod in "${squad_mods[@]}"; do
         "${SQUAD_SERVER_DIR}/SquadGame/Plugins/Mods/${mod}"
 done
 
+rm -rf "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig"
+mkdir -p /ServerConfig
+ln -s /ServerConfig "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig"
+chown -R "${USER}:${USER}" /ServerConfig
+chmod -R 0744 /ServerConfig
+
 
 __EOR__
+
+USER "${USER}"
+
+
+
+FROM build AS prod
+USER "${USER}"
+WORKDIR "${USER_HOME}"
+CMD [ "/bin/bash", "entry.sh" ]
 
 EXPOSE ${GAMEPORT}/udp \
             ${QUERYPORT}/tcp \
             ${QUERYPORT}/udp \
             ${RCONPORT}/tcp \
             ${RCONPORT}/udp
-
-COPY ./scripts/entry.sh "/entry.sh"
-
-ENTRYPOINT [ "/bin/bash", "/entry.sh" ]
