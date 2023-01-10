@@ -48,21 +48,33 @@ fi
 
 # Install mods as part of image
 
-declare -A squad_mods="${squad_mods}"
+printf "Provided mods list: %s\n" "${squad_mods}"
+IFS="," read -ra squad_mods <<< "${squad_mods}"
 for mod in "${squad_mods[@]}"; do
-    printf "Adding mod: %s" "${mod}"
+    printf "\n\n######\nAdding mod: %s\n######\n\n" "${mod}"
     "${STEAM_CMD_INSTALL_DIR}/steamcmd.sh" \
-        +force_install_dir "${SQUAD_SERVER_DIR}" \
+        +force_install_dir "${SQUAD_SERVER_DIR}/steamapps/workshop/content/${workshop_id}/${mod}" \
         +login anonymous \
         +workshop_download_item "${workshop_id}" "${mod}" \
         +quit
 
-    mv "${SQUAD_SERVER_DIR}/steamapps/workshop/content/${workshop_id}/${mod}" \
-        "${SQUAD_SERVER_DIR}/SquadGame/Plugins/Mods/${mod}"
+    # Link the mod instead of moving it into place, this allows steamcmd to update the mod in place if for whatever
+    # reason that becomes necessary. In reality nightly builds/builds via CI should update these mods. More of a nicety
+    # than something necessary.
+
+    for dir in \
+        "${SQUAD_SERVER_DIR}/steamapps/workshop/content/${workshop_id}/${mod}/steamapps/workshop/"{content,downloads}"/${workshop_id}/${mod}"/*
+        do
+            if [[ "${dir}" != *'*'* ]]; then
+                ln -s "${dir}" "${SQUAD_SERVER_DIR}/SquadGame/Plugins/Mods/"
+            fi
+    done
+    # Remove star glob link
+    rm "${SQUAD_SERVER_DIR}/SquadGame/Plugins/Mods/\*"
 done
 
-rm -rf "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig"
 mkdir -p /ServerConfig
+mv "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig" /ServerConfig
 ln -s /ServerConfig "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig"
 chown -R "${USER}:${USER}" /ServerConfig
 chmod -R 0744 /ServerConfig
