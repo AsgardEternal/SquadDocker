@@ -2,13 +2,14 @@
 FROM asgard.orion-technologies.io/steamcmd:1.0 AS build
 LABEL maintainer="price@orion-technologies.io"
 
-ARG steam_app_id=403240
-ARG steam_beta_app_id=774961
-ARG workshop_id=393380
-ARG steam_beta_password=""
-ARG steam_beta_branch=""
-ARG use_squad_beta=0
-ARG squad_mods="()"
+ENV STEAM_APP_ID=403240
+ENV STEAM_BETA_APP_ID=774961
+ENV WORKSHOP_ID=393380
+ENV STEAM_BETA_PASSWORD=""
+ENV STEAM_BETA_BRANCH=""
+ENV USE_SQUAD_BETA=0
+ENV MODS=""
+ENV UPDATE_SQUAD=0
 
 ENV RCON_PASSWORD=""
 ENV SQUAD_SERVER_DIR="${USER_HOME}/Squad-Server"
@@ -20,77 +21,16 @@ ENV GAMEPORT=7787 \
     FIXEDMAXTICKRATE=40 \
     RANDOM=NONE
 
-COPY --chown=${USER} ./scripts/entry.sh "${USER_HOME}/entry.sh"
-
-SHELL [ "/bin/bash", "-c" ]
-
-RUN <<__EOR__
-
-chmod 0744 "${USER_HOME}/entry.sh"
-
-if (( use_squad_beta == 1 )); then
-    # Install Squad from the Beta branch
-    "${STEAM_CMD_INSTALL_DIR}/steamcmd.sh" \
-        +force_install_dir "${SQUAD_SERVER_DIR}" \
-        +login anonymous \
-        +app_update ${steam_app_id} validate \
-        -beta "${steam_beta_branch}" \
-        -betapassword "${steam_beta_password}" \
-        +quit
-else
-    # Install Squad from the release version
-    "${STEAM_CMD_INSTALL_DIR}/steamcmd.sh" \
-        +force_install_dir "${SQUAD_SERVER_DIR}" \
-        +login anonymous \
-        +app_update ${steam_app_id} validate \
-        +quit
-fi
-
-# Install mods as part of image
-
-printf "Provided mods list: %s\n" "${squad_mods}"
-IFS="," read -ra squad_mods <<< "${squad_mods}"
-for mod in "${squad_mods[@]}"; do
-    printf "\n\n######\nAdding mod: %s\n######\n\n" "${mod}"
-    "${STEAM_CMD_INSTALL_DIR}/steamcmd.sh" \
-        +force_install_dir "${SQUAD_SERVER_DIR}/steamapps/workshop/content/${workshop_id}/${mod}" \
-        +login anonymous \
-        +workshop_download_item "${workshop_id}" "${mod}" \
-        +quit
-
-    # Link the mod instead of moving it into place, this allows steamcmd to update the mod in place if for whatever
-    # reason that becomes necessary. In reality nightly builds/builds via CI should update these mods. More of a nicety
-    # than something necessary.
-
-    for dir in \
-        "${SQUAD_SERVER_DIR}/steamapps/workshop/content/${workshop_id}/${mod}/steamapps/workshop/"{content,downloads}"/${workshop_id}/${mod}"/*
-        do
-            if [[ "${dir}" != *'*'* ]]; then
-                ln -s "${dir}" "${SQUAD_SERVER_DIR}/SquadGame/Plugins/Mods/"
-            fi
-    done
-    # Remove star glob link
-    rm "${SQUAD_SERVER_DIR}/SquadGame/Plugins/Mods/\*"
-done
-
-mkdir -p /ServerConfig
-mv "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig" /ServerConfig
-ln -s /ServerConfig "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig"
-chown -R "${USER}:${USER}" /ServerConfig
-chmod -R 0744 /ServerConfig
-
-
-__EOR__
-
-
+COPY --chown=${USER} ./scripts/entry.bash "${USER_HOME}/entry.bash"
 
 FROM build AS prod
+SHELL [ "/bin/bash" ]
 WORKDIR "${USER_HOME}"
 
-EXPOSE ${GAMEPORT}/udp \
-            ${QUERYPORT}/tcp \
-            ${QUERYPORT}/udp \
-            ${RCONPORT}/tcp \
-            ${RCONPORT}/udp
+EXPOSE 7787/udp \
+            27165/tcp \
+            27165/udp \
+            21114/tcp \
+            21114/udp
 
-ENTRYPOINT [ "/bin/bash", "entry.sh" ]
+ENTRYPOINT [ "/bin/bash", "entry.bash" ]
