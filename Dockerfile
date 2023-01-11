@@ -43,9 +43,6 @@ rm -rf /var/lib/apt/lists/* /root/prepare-node14-yarn.bash
 (
     mkdir -p "${SQUAD_SERVER_DIR}"
     cd "${SQUAD_SERVER_DIR}" || exit 1
-    curl -L0 https://github.com/Team-Silver-Sphere/SquadJS/refs/tags/v${squad_js_version}.tar.gz --output squad-js-${squad_js_version}.tar.gz
-    tar -xf squad-js-${squad_js_version}.tar.gz
-    mv SquadJS-${squad_js_version} SquadJS
 )
 
 __EOR__
