@@ -25,6 +25,7 @@ ENV GAMEPORT=7787 \
 COPY --chown=${USER}:${USER} --chmod=0755 ./scripts/entry.bash "${USER_HOME}/entry.bash"
 COPY --chown=root:root --chmod=0755 ./scripts/prepare-node14-yarn.bash /root/prepare-node14-yarn.bash
 
+# hadolint ignore=DL3003
 RUN <<__EOR__
 apt-get update
 # Requirements for node
