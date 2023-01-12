@@ -2,19 +2,16 @@
 FROM asgard.orion-technologies.io/steamcmd:1.0 AS build
 LABEL maintainer="price@orion-technologies.io"
 
-ARG squad_js_version="3.6.1"
-ENV STEAM_APP_ID=403240
-ENV STEAM_BETA_APP_ID=774961
-ENV WORKSHOP_ID=393380
-ENV STEAM_BETA_PASSWORD=""
-ENV STEAM_BETA_BRANCH=""
-ENV USE_SQUAD_BETA=0
-ENV MODS=""
-ENV UPDATE_SQUAD=0
+ARG steam_app_id=403240
+ARG steam_beta_app_id=774961
+ARG workshop_id=393380
+ARG steam_beta_password=""
+ARG steam_beta_branch=""
+ARG use_squad_beta=0
+ARG mods=""
 
 ENV RCON_PASSWORD=""
 ENV SQUAD_SERVER_DIR="${USER_HOME}/Squad-Server"
-# Space delimited list of mod numbers that are built into the image, e.g. 101 202 303
 ENV GAMEPORT=7787 \
     QUERYPORT=27165 \
     RCONPORT=21114 \
@@ -22,39 +19,83 @@ ENV GAMEPORT=7787 \
     FIXEDMAXTICKRATE=40 \
     RANDOM=NONE
 
-COPY --chown=${USER}:${USER} --chmod=0755 ./scripts/entry.bash "${USER_HOME}/entry.bash"
-COPY --chown=root:root --chmod=0755 ./scripts/prepare-node14-yarn.bash /root/prepare-node14-yarn.bash
+COPY --chown=${USER}:${USER} --chmod=0744 ./scripts/entry.bash "${USER_HOME}/entry.sh"
+COPY --chown=root:root --chmod=0744 ./scripts/prepare-node14-yarn.bash /root/prepare-node14-yarn.bash
+
+SHELL [ "/bin/bash", "-c" ]
 
 # hadolint ignore=DL3003
 RUN <<__EOR__
+
 apt-get update
-# Requirements for node
 apt-get install -y --no-install-suggests --no-install-recommends \
     lsb-release=11.1.0 \
     apt-transport-https=2.2.4 \
     gnupg=2.2.27-2+deb11u2 \
     sqlite=3.34.1-3
 
-/bin/bash /root/prepare-node14-yarn.bash
+/root/prepare-node14-yarn.bash
+
+apt-get install -y --no-install-suggests --no-install-recommends \
+    nodejs \
+    yarn
 
 apt-get remove --purge --auto-remove -y
 rm -rf /var/lib/apt/lists/* /root/prepare-node14-yarn.bash
 
-(
-    mkdir -p "${SQUAD_SERVER_DIR}"
-    cd "${SQUAD_SERVER_DIR}" || exit 1
-)
+if (( use_squad_beta == 1 )); then
+    # Install Squad from the Beta branch
+    "${STEAM_CMD_INSTALL_DIR}/steamcmd.sh" \
+        +force_install_dir "${SQUAD_SERVER_DIR}" \
+        +login anonymous \
+        +app_update ${steam_app_id} validate \
+        -beta "${steam_beta_branch}" \
+        -betapassword "${steam_beta_password}" \
+        +quit
+else
+    # Install Squad from the release version
+    "${STEAM_CMD_INSTALL_DIR}/steamcmd.sh" \
+        +force_install_dir "${SQUAD_SERVER_DIR}" \
+        +login anonymous \
+        +app_update ${steam_app_id} validate \
+        +quit
+fi
+
+# Install mods as part of image
+printf "Provided mods list: %s\n" "${mods}"
+IFS="," read -ra squad_mods <<< "${mods}"
+for mod in "${squad_mods[@]}"; do
+    printf "\n\n######\nAdding mod: %s\n######\n\n" "${mod}"
+    counter=0
+    until "${STEAM_CMD_INSTALL_DIR}/steamcmd.sh" \
+        +force_install_dir "${SQUAD_SERVER_DIR}/steamapps/workshop/content/${workshop_id}/${mod}" \
+        +login anonymous \
+        +workshop_download_item "${workshop_id}" "${mod}" \
+        +quit; do
+        printf "\nDid Not Fully Download %s, making another attempt.\n" "${mod}"
+        (( counter++ ))
+        if (( counter > 5 )); then
+            printf "Critical failure, could not download the mod: %s\n" "${mod}"
+            exit 1
+        fi
+    done
+
+
+    # Link the mod instead of moving it into place, this allows steamcmd to update the mod in place if for whatever
+    # reason that becomes necessary. In reality nightly builds/builds via CI should update these mods. More of a nicety
+    # than something necessary.
+    ln -s "${SQUAD_SERVER_DIR}/steamapps/workshop/content/${workshop_id}/${mod}" "${SQUAD_SERVER_DIR}/SquadGame/Plugins/Mods/${mod}"
+done
 
 __EOR__
 
 FROM build AS prod
-SHELL [ "/bin/bash" ]
 WORKDIR "${USER_HOME}"
 
 EXPOSE 7787/udp \
-            27165/tcp \
-            27165/udp \
-            21114/tcp \
-            21114/udp
+    27165/tcp \
+    27165/udp \
+    21114/tcp \
+    21114/udp
 
 ENTRYPOINT [ "/bin/bash", "entry.bash" ]
