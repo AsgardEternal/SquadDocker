@@ -10,6 +10,12 @@ main() {
 		rsync -r "${USER_HOME}/ServerConfig/" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/"
 	fi
 
+	SQUADJSCONFIG=${USER_HOME}/SquadJS/config.json
+	cp "${USER_HOME}/ServerConfig/SquadJSConfig.json" "${SQUADJSCONFIG}"
+	
+	#update squadjs config with instance specific vars
+	sed -i "s/\"rconPassword\": \"password\",/\"rconPassword\": \"${RCON_PASSWORD}\",/" "${SQUADJSCONFIG}"
+	sed -i "s/\"rconPort\": 21114,/\"rconPort\": ${RCONPORT},/" "${SQUADJSCONFIG}"
 
 	# Update RCON configuration based on the fed in environment value
 	while read -r line; do
@@ -31,6 +37,11 @@ main() {
 		QueryPort="${QUERYPORT}" \
 		FIXEDMAXTICKRATE="${FIXEDMAXTICKRATE}" \
 		FIXEDMAXPLAYERS="${FIXEDMAXPLAYERS}"
+
+	#(cd "${USER_HOME}/SquadJS" && su "${USER}" node index.js)
+	#while true ; do
+	#	sleep 1
+	#done
 }
 
 main
