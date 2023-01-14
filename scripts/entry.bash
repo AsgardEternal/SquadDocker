@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# If we want to persist the containter and we don't want to update then we can save a whole lot of time if we mount this
+# If we want to persist the container and we don't want to update then we can save a whole lot of time if we mount this
 # on a volume
 
 main() {
@@ -10,12 +10,9 @@ main() {
 		rsync -r "${USER_HOME}/ServerConfig/" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/"
 	fi
 
+	# Going to want to use a redirection for mounting this from ansible
 	SQUADJSCONFIG=${USER_HOME}/SquadJS/config.json
 	cp "${USER_HOME}/ServerConfig/SquadJSConfig.json" "${SQUADJSCONFIG}"
-	
-	#update squadjs config with instance specific vars
-	sed -i "s/\"rconPassword\": \"password\",/\"rconPassword\": \"${RCON_PASSWORD}\",/" "${SQUADJSCONFIG}"
-	sed -i "s/\"rconPort\": 21114,/\"rconPort\": ${RCONPORT},/" "${SQUADJSCONFIG}"
 
 	# Update RCON configuration based on the fed in environment value
 	while read -r line; do
