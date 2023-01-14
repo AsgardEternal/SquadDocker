@@ -1,5 +1,8 @@
 # syntax=docker/dockerfile:1.4
-FROM asgard.orion-technologies.io/steamcmd:1.0 AS build
+
+# hadolint global ignore=DL3003,DL3008
+
+FROM asgard.orion-technologies.io/steamcmd:1.0 AS build-squad
 LABEL maintainer="price@orion-technologies.io"
 
 ARG steam_app_id=403240
@@ -18,14 +21,10 @@ ENV GAMEPORT=7787 \
     FIXEDMAXPLAYERS=98 \
     FIXEDMAXTICKRATE=40 \
     RANDOM=NONE
-ENV SQUADJS_VERSION="3.6.1"
 
-COPY --chown=${USER}:${USER} --chmod=0744 ./scripts/entry.bash "${USER_HOME}/entry.sh"
-COPY --chown=root:root --chmod=0744 ./scripts/prepare-node14-yarn.bash /root/prepare-node14-yarn.bash
 
 SHELL [ "/bin/bash", "-c" ]
 
-# hadolint ignore=DL3003
 RUN <<__EOR__
 
 apt-get update
@@ -33,27 +32,9 @@ apt-get update
 apt-get install -y --no-install-suggests --no-install-recommends \
     lsb-release=11.1.0 \
     apt-transport-https=2.2.4 \
-    gnupg=2.2.27-2+deb11u2 \
-    sqlite=3.34.1-3
+    gnupg=2.2.27-2+deb11u2
 
-/root/prepare-node14-yarn.bash
-
-apt-get install -y --no-install-suggests --no-install-recommends \
-    nodejs
-
-apt-get install -y --no-install-suggests --no-install-recommends \
-	wget \
-	unzip
-
-apt-get remove -y cmdtest
-
-curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-
-apt-get update
-apt-get install -y yarn
-
-rm -rf /var/lib/apt/lists/* /root/prepare-node14-yarn.bash
+rm -rf /var/lib/apt/lists/*
 
 if (( use_squad_beta == 1 )); then
     # Install Squad from the Beta branch
@@ -97,22 +78,41 @@ for mod in "${squad_mods[@]}"; do
     # reason that becomes necessary. In reality nightly builds/builds via CI should update these mods. More of a nicety
     # than something necessary.
     ln -s "${SQUAD_SERVER_DIR}/steamapps/workshop/content/${workshop_id}/${mod}" "${SQUAD_SERVER_DIR}/SquadGame/Plugins/Mods/${mod}"
-    #cp -R "${SQUAD_SERVER_DIR}/steamapps/workshop/content/${workshop_id}/${mod}" "${SQUAD_SERVER_DIR}/SquadGame/Plugins?mods/${mod}"
 done
-
-#download squadjs
-wget https://github.com/Team-Silver-Sphere/SquadJS/archive/refs/tags/v${SQUADJS_VERSION}.zip -O "${USER_HOME}/SquadJS.zip"
-unzip "${USER_HOME}/SquadJS.zip"
-mv "${USER_HOME}/SquadJS-${SQUADJS_VERSION}" "${USER_HOME}/SquadJS"
-cd "${USER_HOME}/SquadJS"
-yarn install
 
 __EOR__
 
-FROM build AS prod
-WORKDIR "${USER_HOME}"
+FROM build-squad AS squadjs
 
-EXPOSE 3305/udp \
+ARG squadjs_version="3.6.1"
+
+COPY --chown=root:root --chmod=0744 ./scripts/prepare-node14-yarn.bash /root/prepare-node14-yarn.bash
+SHELL [ "/bin/bash", "-c" ]
+
+RUN <<__EOR__
+/root/prepare-node14-yarn.bash
+apt-get update
+apt-get install -y --no-install-suggests --no-install-recommends \
+    yarn \
+    nodejs
+
+rm -rf /var/lib/apt/lists/* /root/prepare-node14-yarn.bash
+
+(
+    git clone --depth 1 --branch "v${squadjs_version}" https://github.com/Team-Silver-Sphere/SquadJS.git "${USER_HOME}/SquadJS"
+    cd "${USER_HOME}/SquadJS" || exit 1
+    yarn install
+    yarn cache clean
+)
+__EOR__
+
+
+FROM squadjs AS prod
+WORKDIR "${USER_HOME}"
+COPY --chown=${USER}:${USER} --chmod=0744 ./scripts/entry.bash "${USER_HOME}/entry.bash"
+
+EXPOSE \
+    3305/udp \
     3305/tcp \
     7787/udp \
     7787/tcp \
@@ -123,4 +123,4 @@ EXPOSE 3305/udp \
     21114/tcp \
     21114/udp
 
-ENTRYPOINT [ "/bin/bash", "entry.sh" ]
+ENTRYPOINT [ "/bin/bash", "/entry.bash" ]
