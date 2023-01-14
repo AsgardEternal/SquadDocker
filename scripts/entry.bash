@@ -4,15 +4,14 @@
 # on a volume
 
 main() {
-	local mounted_files
-	mounted_files="$(shopt -s nullglob dotglob; echo "${USER_HOME}/ServerConfig/")"
-	if (( ${#mounted_files} )); then
-		rsync -r "${USER_HOME}/ServerConfig/" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/"
+	local mount="/docker-mount/"
+	if [[ -r "${mount}/ServerConfig" ]]; then
+		rsync -r "${mount}/ServerConfig/" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/"
 	fi
 
-	# Going to want to use a redirection for mounting this from ansible
-	SQUADJSCONFIG=${USER_HOME}/SquadJS/config.json
-	cp "${USER_HOME}/ServerConfig/SquadJSConfig.json" "${SQUADJSCONFIG}"
+	if [[ -r "${mount}/SquadJS.config" ]]; then
+		rsync "${mount}/ServerConfig/" "${USER_HOME}/SquadJS/config.json"
+	fi
 
 	# Update RCON configuration based on the fed in environment value
 	while read -r line; do

@@ -7,11 +7,9 @@ LABEL maintainer="price@orion-technologies.io"
 
 ARG steam_app_id=403240
 ARG steam_beta_app_id=774961
-ARG workshop_id=393380
 ARG steam_beta_password=""
 ARG steam_beta_branch=""
 ARG use_squad_beta=0
-ARG mods=""
 
 ENV RCON_PASSWORD=""
 ENV SQUAD_SERVER_DIR="${USER_HOME}/Squad-Server"
@@ -32,7 +30,8 @@ apt-get update
 apt-get install -y --no-install-suggests --no-install-recommends \
     lsb-release=11.1.0 \
     apt-transport-https=2.2.4 \
-    gnupg=2.2.27-2+deb11u2
+    gnupg=2.2.27-2+deb11u2 \
+    sqlite3=3.34.1-3
 
 rm -rf /var/lib/apt/lists/*
 
@@ -54,6 +53,16 @@ else
         +quit
 fi
 
+__EOR__
+
+FROM build-squad AS mods
+
+ARG workshop_id=393380
+ARG mods=""
+
+SHELL [ "/bin/bash", "-c" ]
+
+RUN <<__EOR__
 # Install mods as part of image
 printf "Provided mods list: %s\n" "${mods}"
 IFS="," read -ra squad_mods <<< "${mods}"
@@ -82,7 +91,7 @@ done
 
 __EOR__
 
-FROM build-squad AS squadjs
+FROM mods AS squadjs
 
 ARG squadjs_version="3.6.1"
 
@@ -123,4 +132,4 @@ EXPOSE \
     21114/tcp \
     21114/udp
 
-ENTRYPOINT [ "/bin/bash", "/entry.bash" ]
+ENTRYPOINT [ "/bin/bash", "entry.bash" ]
