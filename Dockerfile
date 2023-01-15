@@ -103,8 +103,7 @@ RUN <<__EOR__
 apt-get update
 apt-get install -y --no-install-suggests --no-install-recommends \
     yarn \
-    nodejs \
-    tmux=3.1c-1+deb11u1
+    nodejs
 
 rm -rf /var/lib/apt/lists/* /root/prepare-node14-yarn.bash
 
