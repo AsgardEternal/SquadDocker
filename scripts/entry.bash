@@ -31,10 +31,10 @@ main() {
 
 	printf "Starting the Squad Server....\n"
 	su "${USER}" - "${SQUAD_SERVER_DIR}/SquadGameServer.sh" \
-        Port="${GAMEPORT}" \
-        QueryPort="${QUERYPORT}" \
-        FIXEDMAXTICKRATE="${FIXEDMAXTICKRATE}" \
-        FIXEDMAXPLAYERS="${FIXEDMAXPLAYERS}" >/dev/null 2>&1 &
+		Port="${GAMEPORT}" \
+		QueryPort="${QUERYPORT}" \
+		FIXEDMAXTICKRATE="${FIXEDMAXTICKRATE}" \
+		FIXEDMAXPLAYERS="${FIXEDMAXPLAYERS}" >/dev/null 2>&1 &
 
 	 su "${USER}" - /usr/bin/node "${SQUADJS_DIR}/index.js" &
 
