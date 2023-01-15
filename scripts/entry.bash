@@ -36,13 +36,9 @@ main() {
 			QueryPort="${QUERYPORT}" \
 			FIXEDMAXTICKRATE="${FIXEDMAXTICKRATE}" \
 			FIXEDMAXPLAYERS="${FIXEDMAXPLAYERS}" >/dev/null 2>&1 &
+			/usr/bin/node "${SQUADJS_DIR}/index.js" &
+			wait
 	__EOC__
-
-	 su "${USER}" - <<- __EOC__
-	 	/usr/bin/node "${SQUADJS_DIR}/index.js" &
-	__EOC__
-
-	wait
 
 }
 
