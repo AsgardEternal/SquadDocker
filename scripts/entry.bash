@@ -29,15 +29,21 @@ main() {
 		fi
 	done < "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/Rcon.cfg" > "rcon.temp" && mv "rcon.temp" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/Rcon.cfg"
 
-	printf "Starting the Squad Server....\n"
 	su "${USER}" - <<- __EOC__
+		printf "Starting the Squad Server....\n"
 		"${SQUAD_SERVER_DIR}/SquadGameServer.sh" \
 			Port="${GAMEPORT}" \
 			QueryPort="${QUERYPORT}" \
 			FIXEDMAXTICKRATE="${FIXEDMAXTICKRATE}" \
 			FIXEDMAXPLAYERS="${FIXEDMAXPLAYERS}" >/dev/null 2>&1 &
-			/usr/bin/node "${SQUADJS_DIR}/index.js" &
-			wait
+		printf "Squad Server Started!\n"
+
+		printf "Starting SquadJS...\n"
+		sleep 5
+		/usr/bin/node "${SQUADJS_DIR}/index.js" &
+		printf "SquadJS Started!\n"
+
+		wait
 	__EOC__
 
 }
