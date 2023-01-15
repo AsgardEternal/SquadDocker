@@ -35,12 +35,13 @@ main() {
 		Port="${GAMEPORT}" \
 		QueryPort="${QUERYPORT}" \
 		FIXEDMAXTICKRATE="${FIXEDMAXTICKRATE}" \
-		FIXEDMAXPLAYERS="${FIXEDMAXPLAYERS}"
+		FIXEDMAXPLAYERS="${FIXEDMAXPLAYERS}" &
 
-	#(cd "${USER_HOME}/SquadJS" && su "${USER}" node index.js)
-	#while true ; do
-	#	sleep 1
-	#done
+	(cd "${USER_HOME}/SquadJS" && su "${USER}" node index.js) &
+
+	wait -n
+
+	echo $?
 }
 
 main
