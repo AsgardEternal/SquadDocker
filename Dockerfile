@@ -95,6 +95,8 @@ FROM mods AS squadjs
 
 ARG squadjs_version="3.6.1"
 
+ENV SQUADJS_DIR="${USER_HOME}/SquadJS/"
+
 COPY --chown=root:root --chmod=0744 ./scripts/prepare-node14-yarn.bash /root/prepare-node14-yarn.bash
 SHELL [ "/bin/bash", "-c" ]
 

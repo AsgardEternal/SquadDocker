@@ -7,13 +7,13 @@ main() {
 	local mount="/docker-mount/"
 	chown -R "${USER}:${USER}" "${mount}"
 	if [[ -r "${mount}/ServerConfig" ]]; then
-		printf "Syncing ServerConfig from '%s' -> '%s'\n" "${mount}/ServerConfig/" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/"
-		rsync -r "${mount}/ServerConfig/" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/"
+		printf "Linking ServerConfig from '%s' -> '%s'\n" "${mount}/ServerConfig/" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/"
+		ln -sf "${mount}/ServerConfig" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig"
 	fi
 
 	if [[ -r "${mount}/SquadJS.json" ]]; then
-		printf "Syncing SquadJS Config from '%s' -> '%s'\n" "${mount}/SquadJS.json" "${USER_HOME}/SquadJS/config.json"
-		rsync "${mount}/SquadJS.json" "${USER_HOME}/SquadJS/config.json"
+		printf "Linking SquadJS Config from '%s' -> '%s'\n" "${mount}/SquadJS.json" "${SQUADJS_DIR}/config.json"
+		ln -sf "${mount}/SquadJS.json" "${SQUADJS_DIR}/config.json"
 	fi
 
 	# Update RCON configuration based on the fed in environment value
