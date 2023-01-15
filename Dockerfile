@@ -31,8 +31,7 @@ apt-get install -y --no-install-suggests --no-install-recommends \
     lsb-release=11.1.0 \
     apt-transport-https=2.2.4 \
     gnupg=2.2.27-2+deb11u2 \
-    sqlite3=3.34.1-3 \
-    tmux=0.8.2-2
+    sqlite3=3.34.1-3
 
 rm -rf /var/lib/apt/lists/*
 
@@ -104,7 +103,8 @@ RUN <<__EOR__
 apt-get update
 apt-get install -y --no-install-suggests --no-install-recommends \
     yarn \
-    nodejs
+    nodejs \
+    tmux=3.1c-1+deb11u1
 
 rm -rf /var/lib/apt/lists/* /root/prepare-node14-yarn.bash
 
