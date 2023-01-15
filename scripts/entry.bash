@@ -5,6 +5,7 @@
 
 main() {
 	local mount="/docker-mount/"
+	chown -R "${USER}:${USER}" "${mount}"
 	if [[ -r "${mount}/ServerConfig" ]]; then
 		rsync -r "${mount}/ServerConfig/" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/"
 	fi
