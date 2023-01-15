@@ -31,7 +31,8 @@ apt-get install -y --no-install-suggests --no-install-recommends \
     lsb-release=11.1.0 \
     apt-transport-https=2.2.4 \
     gnupg=2.2.27-2+deb11u2 \
-    sqlite3=3.34.1-3
+    sqlite3=3.34.1-3 \
+    tmux=0.8.2-2
 
 rm -rf /var/lib/apt/lists/*
 

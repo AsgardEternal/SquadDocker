@@ -29,19 +29,22 @@ main() {
 		fi
 	done < "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/Rcon.cfg" > "rcon.temp" && mv "rcon.temp" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/Rcon.cfg"
 
+	printf "Starting the Squad Server....\n"
+	su "${USER}" << __EOC__
+	tmux new-session -d -s "Squad-Server" \
+		"${SQUAD_SERVER_DIR}/SquadGameServer.sh" \
+			Port="${GAMEPORT}" \
+			QueryPort="${QUERYPORT}" \
+			FIXEDMAXTICKRATE="${FIXEDMAXTICKRATE}" \
+			FIXEDMAXPLAYERS="${FIXEDMAXPLAYERS}" &&
+	printf "Started the Squad Server\n"
 
-	chown -R "${USER}:${USER}" "${USER_HOME}"
-	su "${USER}" - "${SQUAD_SERVER_DIR}/SquadGameServer.sh" \
-		Port="${GAMEPORT}" \
-		QueryPort="${QUERYPORT}" \
-		FIXEDMAXTICKRATE="${FIXEDMAXTICKRATE}" \
-		FIXEDMAXPLAYERS="${FIXEDMAXPLAYERS}" &
+	printf "Starting SquadJS...\n"
+	sleep 5
+	node "${USER_HOME}/SquadJS/index.js"
 
-	(cd "${USER_HOME}/SquadJS" && su "${USER}" node index.js) &
+__EOC__
 
-	wait -n
-
-	echo $?
 }
 
 main
