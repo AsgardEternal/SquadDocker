@@ -34,7 +34,7 @@ main() {
         Port="${GAMEPORT}" \
         QueryPort="${QUERYPORT}" \
         FIXEDMAXTICKRATE="${FIXEDMAXTICKRATE}" \
-        FIXEDMAXPLAYERS="${FIXEDMAXPLAYERS}" && exit "${?}" &
+        FIXEDMAXPLAYERS="${FIXEDMAXPLAYERS}" &
 
 	 su "${USER}" - /usr/bin/node "${SQUADJS_DIR}/index.js" &
 
