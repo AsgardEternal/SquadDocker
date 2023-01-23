@@ -32,6 +32,7 @@ main() {
 	done < "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/Rcon.cfg" > "rcon.temp" && mv "rcon.temp" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/Rcon.cfg"
 
 	chown "${USER}:${USER}" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/Rcon.cfg"
+	chown -R "${USER}:${USER}" "${SQUADJS_DIR}"
 
 	su "${USER}" - <<- __EOC__
 		printf "Starting the Squad Server....\n"
