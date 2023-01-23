@@ -8,7 +8,9 @@ main() {
 	chown -R "${USER}:${USER}" "${mount}"
 	if [[ -r "${mount}/ServerConfig" ]]; then
 		printf "Linking ServerConfig from '%s' -> '%s'\n" "${mount}/ServerConfig/" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/"
-		ln -sf "${mount}/ServerConfig" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig"
+		for file in "${mount}/ServerConfig/"*; do
+			ln -sf "${file}" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/$(basename "${file}")"
+		done
 	fi
 
 	if [[ -r "${mount}/SquadJS.json" ]]; then
