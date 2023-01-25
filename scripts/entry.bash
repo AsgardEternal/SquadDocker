@@ -13,11 +13,6 @@ main() {
 		done
 	fi
 
-	if [[ -r "${mount}/SquadJS.json" ]]; then
-		printf "Linking SquadJS Config from '%s' -> '%s'\n" "${mount}/SquadJS.json" "${SQUADJS_DIR}/config.json"
-		ln -sf "${mount}/SquadJS.json" "${SQUADJS_DIR}/config.json"
-	fi
-
 	# Update RCON configuration based on the fed in environment value
 	while read -r line; do
 		if [[ "${line}" == Password=* ]]; then
@@ -32,7 +27,6 @@ main() {
 	done < "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/Rcon.cfg" > "rcon.temp" && mv "rcon.temp" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/Rcon.cfg"
 
 	chown "${USER}:${USER}" "${SQUAD_SERVER_DIR}/SquadGame/ServerConfig/Rcon.cfg"
-	chown -R "${USER}:${USER}" "${SQUADJS_DIR}"
 
 	su "${USER}" - <<- __EOC__
 		printf "Starting the Squad Server....\n"
@@ -42,11 +36,6 @@ main() {
 			FIXEDMAXTICKRATE="${FIXEDMAXTICKRATE}" \
 			FIXEDMAXPLAYERS="${FIXEDMAXPLAYERS}" >/dev/null 2>&1 &
 		printf "Squad Server Started!\n"
-
-		printf "Starting SquadJS...\n"
-		sleep 5
-		/usr/bin/node "${SQUADJS_DIR}/index.js" &
-		printf "SquadJS Started!\n"
 
 		wait
 	__EOC__

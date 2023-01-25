@@ -91,37 +91,8 @@ done
 
 __EOR__
 
-FROM mods AS squadjs
 
-ARG squadjs_version="3.6.1"
-
-ENV SQUADJS_DIR="${USER_HOME}/SquadJS/"
-
-COPY --chown=root:root --chmod=0744 ./scripts/prepare-node14-yarn.bash /root/prepare-node14-yarn.bash
-SHELL [ "/bin/bash", "-c" ]
-
-RUN <<__EOR__
-/root/prepare-node14-yarn.bash
-apt-get update
-apt-get install -y --no-install-suggests --no-install-recommends \
-    yarn \
-    nodejs
-
-rm -rf /var/lib/apt/lists/* /root/prepare-node14-yarn.bash
-
-su "${USER}" - <<- __EOC__
-    (
-        git clone --depth 1 --branch "v${squadjs_version}" https://github.com/Team-Silver-Sphere/SquadJS.git "${USER_HOME}/SquadJS"
-        cd "${USER_HOME}/SquadJS" || exit 1
-        yarn install
-        yarn cache clean
-    )
-__EOC__
-
-__EOR__
-
-
-FROM squadjs AS prod
+FROM mods AS prod
 WORKDIR "${USER_HOME}"
 COPY --chown=${USER}:${USER} --chmod=0744 ./scripts/entry.bash "${USER_HOME}/entry.bash"
 
