@@ -2,7 +2,7 @@
 
 # hadolint global ignore=DL3003,DL3008
 
-FROM asgard.orion-technologies.io/steamcmd:1.0 AS build-squad
+FROM asgard.orion-technologies.io/steamcmd:latest AS build-squad
 LABEL maintainer="price@orion-technologies.io"
 
 ARG steam_app_id=403240
