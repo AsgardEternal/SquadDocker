@@ -33,7 +33,7 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        cache-from: type=registry,ref=user/squad:latest
+        cache-from: type=registry,ref=${{ vars.DOCKER_REGISTRY_URL }}/squad:latest
         cache-to: type=inline
         tags: "${{ vars.DOCKER_REGISTRY_URL }}/squad:latest"
 
@@ -46,6 +46,6 @@ jobs:
         build-args: |
           mods='1959152751,2618610732'
         push: true
-        cache-from: type=registry,ref=user/squad:mee-french-latest
+        cache-from: type=registry,ref=${{ vars.DOCKER_REGISTRY_URL }}/squad:mee-french-latest
         cache-to: type=inline
         tags: "${{ vars.DOCKER_REGISTRY_URL }}/squad:mee-french-latest"
