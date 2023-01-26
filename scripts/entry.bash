@@ -34,7 +34,7 @@ main() {
 			Port="${GAMEPORT}" \
 			QueryPort="${QUERYPORT}" \
 			FIXEDMAXTICKRATE="${FIXEDMAXTICKRATE}" \
-			FIXEDMAXPLAYERS="${FIXEDMAXPLAYERS}" >/dev/null 2>&1 &
+			FIXEDMAXPLAYERS="${FIXEDMAXPLAYERS}" &
 		printf "Squad Server Started!\n"
 
 		wait
