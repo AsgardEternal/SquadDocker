@@ -33,16 +33,19 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: "${{ secrets.DOCKER_REGISTRY_USER }}/squad:latest"
+        cache-from: type=registry,ref=user/squad:latest
+        cache-to: type=inline
+        tags: "${{ vars.DOCKER_REGISTRY_URL }}/squad:latest"
 
 
-    - name: Build Vanilla Squad Image
+    - name: Build MEE-French Squad Image
       uses: docker/build-push-action@v3
       with:
         context: .
         file: ./Dockerfile
+        build-args: |
+          mods='1959152751,2618610732'
         push: true
-        cache-from: type=registry,ref=user/squad:latest
+        cache-from: type=registry,ref=user/squad:mee-french-latest
         cache-to: type=inline
-        tags: "${{ secrets.DOCKER_REGISTRY_USER }}/squad:latest"
-
+        tags: "${{ vars.DOCKER_REGISTRY_URL }}/squad:mee-french-latest"
