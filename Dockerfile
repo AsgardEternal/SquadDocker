@@ -34,6 +34,9 @@ apt-get install -y --no-install-suggests --no-install-recommends \
 
 rm -rf /var/lib/apt/lists/*
 
+echo "${STEAM_CMD_INSTALL_DIR}"
+ls -lf "${STEAM_CMD_INSTALL_DIR}/steamcmd.sh"
+
 if (( use_squad_beta == 1 )); then
     # Install Squad from the Beta branch
     "${STEAM_CMD_INSTALL_DIR}/steamcmd.sh" \
