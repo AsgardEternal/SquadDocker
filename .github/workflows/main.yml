@@ -33,7 +33,6 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        cache-from: type=registry,ref=${{ vars.DOCKER_REGISTRY_URL }}/squad:latest
         cache-to: type=inline
         tags: "${{ vars.DOCKER_REGISTRY_URL }}/squad:latest"
 
@@ -46,7 +45,6 @@ jobs:
         build-args: |
           mods=1959152751,2618610732
         push: true
-        cache-from: type=registry,ref=${{ vars.DOCKER_REGISTRY_URL }}/squad:mee-french-latest
         cache-to: type=inline
         tags: "${{ vars.DOCKER_REGISTRY_URL }}/squad:mee-french-latest"
         
@@ -58,7 +56,6 @@ jobs:
         build-args: |
           mods=2924330335,2923657563,2914624834,2891780963,2922041761,2933029302
         push: true
-        cache-from: type=registry,ref=${{ vars.DOCKER_REGISTRY_URL }}/squad:tac-latest
         cache-to: type=inline
         tags: "${{ vars.DOCKER_REGISTRY_URL }}/squad:tac-latest"
         
@@ -70,7 +67,6 @@ jobs:
         build-args: |
           mods=2891780963
         push: true
-        cache-from: type=registry,ref=${{ vars.DOCKER_REGISTRY_URL }}/squad:tac-bots-latest
         cache-to: type=inline
         tags: "${{ vars.DOCKER_REGISTRY_URL }}/squad:tac-bots-latest"
         
