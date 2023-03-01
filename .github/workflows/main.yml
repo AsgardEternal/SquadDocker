@@ -24,6 +24,8 @@ jobs:
             mods: "2891780963"
     runs-on: self-hosted
     steps:
+      - uses: actions/checkout@v3
+    
       - name: Init Build
         uses: ./.github/workflows/init.yml
         
