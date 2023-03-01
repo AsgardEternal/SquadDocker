@@ -46,5 +46,5 @@ jobs:
           build-args: mods=${{ matrix.mods }}
           push: true
           cache-from: type=registry,ref=${{ vars.DOCKER_REGISTRY_URL }}/squad:${{ matrix.name-id }}
-          cache-to: inline
+          cache-to: type=registry,ref=${{ vars.DOCKER_REGISTRY_URL }}/squad:${{ matrix.name-id }}
           tags: "${{ vars.DOCKER_REGISTRY_URL }}/squad:${{ matrix.name-id }}"
