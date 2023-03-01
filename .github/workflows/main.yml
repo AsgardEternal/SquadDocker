@@ -12,6 +12,8 @@ jobs:
 
   build_matrix:
     strategy:
+      max-parallel: 1
+      fail-fast: false
       matrix:
         include:
           - name-id: latest
