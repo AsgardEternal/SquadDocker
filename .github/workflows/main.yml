@@ -12,7 +12,7 @@ jobs:
 
   build_matrix:
     strategy:
-      max-parallel: 1
+      max-parallel: 4
       fail-fast: false
       matrix:
         include:
