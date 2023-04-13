@@ -49,6 +49,7 @@ jobs:
           - name-id: tac-bots-latest
             mods: "2891780963"
     runs-on: self-hosted
+    needs: base-squad
     steps:
       - uses: actions/checkout@v3
       
