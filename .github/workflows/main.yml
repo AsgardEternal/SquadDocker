@@ -33,7 +33,6 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: "${{ vars.DOCKER_REGISTRY_URL }}/squad:latest"
-          cache-from: type=registry,ref=${{ vars.DOCKER_REGISTRY_URL }}/squad:latest
           cache-to: type=inline
 
   build_matrix:
