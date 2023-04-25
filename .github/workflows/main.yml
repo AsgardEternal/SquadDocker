@@ -58,6 +58,14 @@ jobs:
     needs: base-squad
     steps:
       - uses: actions/checkout@v3
+      
+      - name: Registry Login
+        uses: docker/login-action@v2
+        with:
+          registry: "${{ vars.DOCKER_REGISTRY_URL }}"
+          username: "${{ secrets.DOCKER_REGISTRY_USER }}"
+          password: "${{ secrets.DOCKER_REGISTRY_PASSWORD }}"
+          logout: false
           
       - name: Setup Docker Buildx
         id: buildx
