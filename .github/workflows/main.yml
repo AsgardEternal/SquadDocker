@@ -43,6 +43,8 @@ jobs:
         include:
           - name-id: mee-french-latest
             mods: "1959152751,2618610732"
+          - name-id: galac-latest
+            mods: "2428425228"
           - name-id: tac-latest
             mods: "2924330335,2923657563,2914624834,2891780963,2922041761,2933029302"
           - name-id: tac-bots-latest
