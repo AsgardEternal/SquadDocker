@@ -34,7 +34,8 @@ main() {
 			Port="${GAMEPORT}" \
 			QueryPort="${QUERYPORT}" \
 			FIXEDMAXTICKRATE="${FIXEDMAXTICKRATE}" \
-			FIXEDMAXPLAYERS="${FIXEDMAXPLAYERS}" &
+			FIXEDMAXPLAYERS="${FIXEDMAXPLAYERS}" \
+   			beaconport="${BEACONPORT}" &
 		printf "Squad Server Started!\n"
 
 		wait
