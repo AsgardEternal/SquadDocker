@@ -105,6 +105,8 @@ EXPOSE \
     27165/tcp \
     27165/udp \
     21114/tcp \
-    21114/udp
+    21114/udp \
+    15000-15022/tcp \
+    15000-15022/udp
 
 ENTRYPOINT [ "/bin/bash", "entry.bash" ]
