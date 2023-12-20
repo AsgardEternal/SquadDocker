@@ -97,8 +97,6 @@ WORKDIR "${USER_HOME}"
 COPY --chown=${USER}:${USER} --chmod=0744 ./scripts/entry.bash "${USER_HOME}/entry.bash"
 
 EXPOSE \
-    3305/udp \
-    3305/tcp \
     7787/udp \
     7787/tcp \
     7788/udp \
@@ -107,7 +105,6 @@ EXPOSE \
     27165/udp \
     21114/tcp \
     21114/udp \
-    15000-15022/tcp \
-    15000-15022/udp
+    15000/udp
 
 ENTRYPOINT [ "/bin/bash", "entry.bash" ]
