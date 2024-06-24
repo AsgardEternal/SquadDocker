@@ -3,18 +3,17 @@ name: Docker Image CI
 on:
   workflow_dispatch:
   schedule:
-    - cron: '05 18 * * *'
+    - cron: "05 18 * * *"
   push:
     branches:
       - Development
 
 jobs:
-
   log-reg:
     runs-on: self-hosted
     steps:
       - name: Registry Login
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: "${{ vars.DOCKER_REGISTRY_URL }}"
           username: "${{ secrets.DOCKER_REGISTRY_USER }}"
@@ -26,13 +25,13 @@ jobs:
     needs: log-reg
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-          
+        uses: actions/checkout@v4
+
       - name: set up Buildx
-        uses: docker/setup-buildx-action@v2
-      
+        uses: docker/setup-buildx-action@v3
+
       - name: Build and Push
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
@@ -46,10 +45,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name-id: mee-french-latest
-            mods: "1959152751,2618610732"
-          - name-id: galac-latest
-            mods: "2428425228"
           - name-id: tac-latest
             mods: "2914624834,2891780963,2924330335,2923657563,2923966298,2960147679,2960146775,2972409386,2957886095"
           - name-id: tac-bots-latest
@@ -58,7 +53,7 @@ jobs:
     needs: base-squad
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Registry Login
         uses: docker/login-action@v2
         with:
@@ -66,11 +61,11 @@ jobs:
           username: "${{ secrets.DOCKER_REGISTRY_USER }}"
           password: "${{ secrets.DOCKER_REGISTRY_PASSWORD }}"
           logout: false
-          
+
       - name: Setup Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v2
-        
+
       - name: Build Image
         uses: docker/build-push-action@v3
         with:
@@ -82,7 +77,7 @@ jobs:
           tags: "${{ vars.DOCKER_REGISTRY_URL }}/squad:${{ matrix.name-id }}"
           cache-from: type=registry,ref=${{ vars.DOCKER_REGISTRY_URL }}/squad:latest
           cache-to: type=inline
-          
+
   logout-reg:
     runs-on: self-hosted
     needs: build_matrix
