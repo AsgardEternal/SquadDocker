@@ -35,6 +35,10 @@ apt-get install -y --no-install-suggests --no-install-recommends \
 
 rm -rf /var/lib/apt/lists/*
 
+# HACK: Hard coding the user to be "steam" is not great, but I'm too lazy to really do this the
+# *right* way (which is making sure the USER ends up as steam via an entry point up in the steamcmd
+# image). For now, this will have to do.
+su steam -c "/bin/bash" <<-__EOS__
 if (( use_squad_beta == 1 )); then
     # Install Squad from the Beta branch
     "${STEAM_CMD_INSTALL_DIR}/steamcmd.sh" \
@@ -52,6 +56,7 @@ else
         +app_update ${steam_app_id} validate \
         +quit
 fi
+__EOS__
 
 __EOR__
 
