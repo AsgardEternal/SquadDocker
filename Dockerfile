@@ -29,9 +29,9 @@ RUN <<__EOR__
 apt-get update
 
 apt-get install -y --no-install-suggests --no-install-recommends \
-    lsb-release=11.1.0 \
-    apt-transport-https=2.2.4 \
-    gnupg=2.2.27-2+deb11u2
+    lsb-release=12.0-1 \
+    apt-transport-https=2.6.1 \
+    gnupg=2.2.40-1.1
 
 rm -rf /var/lib/apt/lists/*
 
