@@ -77,7 +77,7 @@ for mod in "${squad_mods[@]}"; do
     until "${STEAM_CMD_INSTALL_DIR}/steamcmd.sh" \
         +force_install_dir "${SQUAD_SERVER_DIR}/steamapps/workshop/content/${workshop_id}/${mod}" \
         +login anonymous \
-        +workshop_download_item "${workshop_id}" "${mod}" \
+        +workshop_download_item "${workshop_id}" "${mod}" validate \
         +quit; do
         printf "\nDid Not Fully Download %s, making another attempt.\n" "${mod}"
         (( counter++ ))
