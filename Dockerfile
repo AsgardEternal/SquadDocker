@@ -112,4 +112,6 @@ EXPOSE \
     21114/udp \
     15000/udp
 
+# HACK: This shouldn't be done either! The entry.bash requires the root user though for certain tasks :(
+USER root
 ENTRYPOINT [ "/bin/bash", "entry.bash" ]
