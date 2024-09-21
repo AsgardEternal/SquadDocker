@@ -37,7 +37,6 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: "${{ vars.DOCKER_REGISTRY_URL }}/squad:latest"
-          cache-to: type=inline
 
   build_matrix:
     strategy:
@@ -75,8 +74,6 @@ jobs:
           build-args: mods=${{ matrix.mods }}
           push: true
           tags: "${{ vars.DOCKER_REGISTRY_URL }}/squad:${{ matrix.name-id }}"
-          cache-from: type=registry,ref=${{ vars.DOCKER_REGISTRY_URL }}/squad:latest
-          cache-to: type=inline
 
   logout-reg:
     runs-on: self-hosted
