@@ -2,8 +2,8 @@
 
 # hadolint global ignore=DL3003,DL3008
 
-FROM asgard-eternal.com/steamcmd:latest AS build-squad
-LABEL maintainer="price@orion-technologies.io"
+FROM asgard-eternal.com/steamcmd:latest AS build
+LABEL maintainer="price@price-hiller.com"
 
 ARG steam_app_id=403240
 ARG steam_beta_app_id=774961
@@ -12,7 +12,7 @@ ARG steam_beta_branch=""
 ARG use_squad_beta=0
 
 ENV RCON_PASSWORD=""
-ENV SQUAD_SERVER_DIR="${USER_HOME}/Squad-Server"
+ENV SQUAD_SERVER_DIR="${STEAM_HOME}/Squad-Server"
 ENV GAMEPORT=7787 \
     QUERYPORT=27165 \
     RCONPORT=21114 \
@@ -21,8 +21,6 @@ ENV GAMEPORT=7787 \
     FIXEDMAXTICKRATE=45 \
     RANDOM=NONE
 
-
-SHELL [ "/bin/bash", "-c" ]
 
 RUN <<__EOR__
 apt-get update
@@ -35,71 +33,9 @@ apt-get install -y --no-install-suggests --no-install-recommends \
 rm -rf /var/lib/apt/lists/*
 __EOR__
 
-# HACK: Hard coding the user to be "steam" is not great, but I'm too lazy to really do this the
-# *right* way (which is making sure the USER ends up as steam via an entry point up in the steamcmd
-# image). For now, this will have to do.
-USER steam
-
-RUN <<__EOR__
-if (( use_squad_beta == 1 )); then
-    # Install Squad from the Beta branch
-    "${STEAM_CMD_INSTALL_DIR}/steamcmd.sh" \
-        +force_install_dir "${SQUAD_SERVER_DIR}" \
-        +login anonymous \
-        +app_update ${steam_app_id} validate \
-        -beta "${steam_beta_branch}" \
-        -betapassword "${steam_beta_password}" \
-        +quit
-else
-    # Install Squad from the release version
-    "${STEAM_CMD_INSTALL_DIR}/steamcmd.sh" \
-        +force_install_dir "${SQUAD_SERVER_DIR}" \
-        +login anonymous \
-        +app_update ${steam_app_id} validate \
-        +quit
-fi
-__EOR__
-
-FROM build-squad AS mods
-
-ARG workshop_id=393380
-ARG mods=""
-
-SHELL [ "/bin/bash", "-c" ]
-
-RUN <<__EOR__
-# Install mods as part of image
-printf "Provided mods list: %s\n" "${mods}"
-IFS="," read -ra squad_mods <<< "${mods}"
-for mod in "${squad_mods[@]}"; do
-    printf "\n\n######\nAdding mod: %s\n######\n\n" "${mod}"
-    counter=0
-    until "${STEAM_CMD_INSTALL_DIR}/steamcmd.sh" \
-        +force_install_dir "${SQUAD_SERVER_DIR}/steamapps/workshop/content/${workshop_id}/${mod}" \
-        +login anonymous \
-        +workshop_download_item "${workshop_id}" "${mod}" validate \
-        +quit; do
-        printf "\nDid Not Fully Download %s, making another attempt.\n" "${mod}"
-        (( counter++ ))
-        if (( counter > 5 )); then
-            printf "Critical failure, could not download the mod: %s\n" "${mod}"
-            exit 1
-        fi
-    done
-
-
-    # Link the mod instead of moving it into place, this allows steamcmd to update the mod in place if for whatever
-    # reason that becomes necessary. In reality nightly builds/builds via CI should update these mods. More of a nicety
-    # than something necessary.
-    ln -s "${SQUAD_SERVER_DIR}/steamapps/workshop/content/${workshop_id}/${mod}" "${SQUAD_SERVER_DIR}/SquadGame/Plugins/Mods/${mod}"
-done
-
-__EOR__
-
-
-FROM mods AS prod
-WORKDIR "${USER_HOME}"
-COPY --chown=${USER}:${USER} --chmod=0744 ./scripts/entry.bash "${USER_HOME}/entry.bash"
+FROM build AS prod
+WORKDIR "${STEAM_HOME}"
+COPY --chown=${STEAM_USER}:${STEAM_USER} --chmod=0744 ./scripts/entry.bash "${STEAM_HOME}/entry.bash"
 
 EXPOSE \
     7787/udp \
@@ -112,6 +48,8 @@ EXPOSE \
     21114/udp \
     15000/udp
 
+ARG mods=""
+ENV SQUAD_MODS=${mods}
 # HACK: This shouldn't be done either! The entry.bash requires the root user though for certain tasks :(
 USER root
 ENTRYPOINT [ "/bin/bash", "entry.bash" ]
