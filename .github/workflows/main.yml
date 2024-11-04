@@ -47,7 +47,7 @@ jobs:
         include:
           - name-id: tac-latest
             mods: "2914624834,2891780963,2924330335,2923657563,2923966298,2960147679,2960146775,2972409386,2957886095,2432926361"
-          - name-id: Global Escalation
+          - name-id: global-escalation
             mods: "3014073690"
     runs-on: self-hosted
     needs: base-squad
