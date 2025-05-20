@@ -94,7 +94,7 @@ start-squad-server() {
 			QueryPort="${QUERYPORT}" \
 			FIXEDMAXTICKRATE="${FIXEDMAXTICKRATE}" \
 			FIXEDMAXPLAYERS="${FIXEDMAXPLAYERS}" \
-		      beaconport="${BEACONPORT}" ${@} &
+		      beaconport="${BEACONPORT}" &
 		printf "Squad Server Started!\n"
 
 		wait
@@ -115,8 +115,8 @@ main() {
 
 	update-rcon-config
 
-	start-squad-server "${@}"
+	start-squad-server
 
 }
 
-main "${@}"
+main
