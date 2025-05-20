@@ -87,9 +87,16 @@ update-rcon-config() {
 }
 
 start-squad-server() {
+	set +u
+	local multi_home_arg=""
+	if [[ -n "${MULTIHOME}" ]]; then
+		multi_home_arg="MULTIHOME=\"${MULTIHOME}\""
+	fi
+	set -u
 	su "${STEAM_USER}" - <<-__EOC__
 		printf "Starting the Squad Server....\n"
 		"${SQUAD_SERVER_DIR}/SquadGameServer.sh" \
+			"${multi_home_arg}" \
 			Port="${GAMEPORT}" \
 			QueryPort="${QUERYPORT}" \
 			FIXEDMAXTICKRATE="${FIXEDMAXTICKRATE}" \
